@@ -2,9 +2,15 @@ from decouple import config
 
 
 class Config:
-   DEBUG = config('DEBUG', default=False, cast=bool)
-   SECRET_KEY = config('SECRET_KEY')
+   SECRET_KEY = config('SECRET_KEY', 'secrete')
 
 
 class DevConfig(Config):
-   DATABASE_URL = config('DATABASE_URL')
+   SQLALCHEMY_DATABASE_URI = config('DATABASE_URL')
+   DEBUG = config('DEBUG', default=False, cast=bool)
+   SQLALCHEMY_ECHO = True
+
+
+config_dict = {
+   'dev': DevConfig
+}
