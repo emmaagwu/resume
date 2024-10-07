@@ -2,18 +2,22 @@
 
 from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
-from utils.db import db  # Import the database instance
+import time
+from ..utils.db import db  # Import the database instance
 from .models import ScrapedJob  # Import the model for storing scraped jobs
 
 def scrape_jobs():
+    print("scrape jobs now")
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        context = browser.new_context()
+        context = browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
+        )
         page = context.new_page()
         
         # Navigate to Indeed or other dynamic site
-        page.goto('https://www.indeed.com/jobs?q=datascience')
-        page.wait_for_timeout(3000)  # Adjust timeout as needed
+        page.goto('https://www.indeed.com/jobs?q=datascience&vjk=6808c8f348c5f750')
+        time.sleep(6)  # Adjust timeout as needed
         
         # Scroll to load all content
         last_height = page.evaluate("document.body.scrollHeight")
@@ -37,6 +41,7 @@ def scrape_jobs():
         title = listing.select_one('[title]').get_text()
         company_name = listing.select_one('[data-testid="company-name"]').get_text()
         company_location = listing.select_one('[data-testid="text-location"]').get_text()
+        print(f"Scraped Job: {title}, {company_name}, {company_location}")
         scraped_data.append((title, company_name, company_location))
 
     # Store in the database
